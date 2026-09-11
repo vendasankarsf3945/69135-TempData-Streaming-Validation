@@ -1,0 +1,71 @@
+@page "/tempdata-early-nonstreaming"
+@using Microsoft.AspNetCore.Components
+
+<h1>TempData early write without streaming</h1>
+
+<p>
+    The TempData value is assigned before the delay, but this page does not use
+    streaming rendering, so the response stays blocked until the delay finishes.
+</p>
+
+<form method="post" @formname="TempDataEarlyNonStreaming" @onsubmit="HandleSubmitAsync">
+    <div class="mb-3">
+        <label class="form-label">
+            Delay (milliseconds)
+            <input class="form-control" type="number" @bind="Model.DelayMilliseconds" />
+        </label>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">
+            TempData message
+            <input class="form-control" type="text" @bind="Model.Message" />
+        </label>
+    </div>
+
+    <button class="btn btn-primary" type="submit">Assign first, then delay</button>
+</form>
+
+<p class="mt-3 mb-0">Status: @status</p>
+
+@code {
+    [CascadingParameter]
+    public ITempData? TempData { get; set; }
+
+    [Inject]
+    public NavigationManager NavigationManager { get; set; } = default!;
+
+    [Inject]
+    public ILogger<TempDataEarlyWriteStatic> Logger { get; set; } = default!;
+
+    public EarlyWriteModel Model { get; set; } = new()
+    {
+        DelayMilliseconds = 1200,
+        Message = "Early TempData assignment from the nonstreaming page"
+    };
+
+    private string status = "Waiting for submission.";
+
+    private async Task HandleSubmitAsync()
+    {
+        Logger.LogInformation(
+            "Response Started : {Time}",
+            DateTime.Now);
+
+        TempData!["TempDataMessage"] = Model.Message;
+        Logger.LogInformation(
+            "TempData Assigned : {Time}",
+            DateTime.Now);
+        status = $"TempData assigned, now waiting {Model.DelayMilliseconds} ms.";
+        await Task.Delay(Model.DelayMilliseconds);
+
+        NavigationManager.NavigateTo("/tempdata-reader", forceLoad: true);
+    }
+
+    public sealed class EarlyWriteModel
+    {
+        public int DelayMilliseconds { get; set; }
+
+        public string? Message { get; set; }
+    }
+}

@@ -1,0 +1,54 @@
+@page "/session-nonstreaming"
+@using Microsoft.AspNetCore.Components
+
+<h1>Session nonstreaming positive case</h1>
+
+<p>
+    This page uses the same session value flow as the streaming-positive page,
+    but it does not opt into streaming rendering.
+</p>
+
+<p><strong>Session value before first render:</strong> @SessionValue</p>
+
+<form method="post" @formname="SessionNonStreaming" @onsubmit="UpdateSessionAsync">
+    <div class="mb-3">
+        <label class="form-label">
+            Delay (milliseconds)
+            <input class="form-control" type="number" @bind="DelayMilliseconds" />
+        </label>
+    </div>
+
+    <button class="btn btn-primary" type="submit">Delay and update session</button>
+</form>
+
+<p class="mt-3 mb-0">Status: @status</p>
+
+@code {
+    [SupplyParameterFromSession(Name = "sample_session_value")]
+    public int SessionValue { get; set; }
+
+    private object SubmitForm { get; } = new();
+
+    [Inject]
+    public ILogger<SessionNonStreaming> Logger { get; set; } = default!;
+
+    private int DelayMilliseconds { get; set; } = 1200;
+
+    private string status = "Waiting for submission.";
+
+    private async Task UpdateSessionAsync()
+    {
+        Logger.LogInformation(
+            "Response Started : {Time}",
+            DateTime.Now);
+
+        status = $"Waiting {DelayMilliseconds} ms before updating session.";
+        await Task.Delay(DelayMilliseconds);
+
+        SessionValue++;
+        Logger.LogInformation(
+            "Session Assigned : {Time}",
+            DateTime.Now);
+        status = $"Session updated to {SessionValue}. Refresh to confirm the value persists.";
+    }
+}

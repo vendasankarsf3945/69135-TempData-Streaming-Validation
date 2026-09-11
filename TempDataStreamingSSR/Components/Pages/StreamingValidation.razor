@@ -1,0 +1,83 @@
+@page "/tempdata-streaming-write"
+@attribute [StreamRendering]
+@using Microsoft.AspNetCore.Components.Endpoints
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Web
+
+<h1>TempData streaming write</h1>
+
+<p>
+    This page renders its heading immediately, reads session before the first
+    flush, waits for a controllable delay, writes TempData, and redirects to an
+    ordinary reader page.
+</p>
+
+<p><strong>Session value before first flush:</strong> @SessionValue</p>
+
+<form method="post" @formname="TempDataStreamingWrite" @onsubmit="HandleSubmitAsync">
+    <div class="mb-3">
+        <label class="form-label">
+            Delay (milliseconds)
+            <input class="form-control" type="number" @bind="Model.DelayMilliseconds" />
+        </label>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">
+            TempData message
+            <input class="form-control" type="text" @bind="Model.Message" />
+        </label>
+    </div>
+
+    <button class="btn btn-primary" type="submit">Write TempData and redirect</button>
+</form>
+
+<p class="mt-3 mb-0">Status: @status</p>
+
+@code {
+    [CascadingParameter]
+    public ITempData? TempData { get; set; }
+
+    [SupplyParameterFromSession(Name = "sample_session_value")]
+    public int SessionValue { get; set; }
+
+    [Inject]
+    public NavigationManager NavigationManager { get; set; } = default!;
+
+    [Inject]
+    public ILogger<StreamingValidation> Logger { get; set; } = default!;
+
+    public StreamingWriteModel Model { get; set; } = new()
+    {
+        DelayMilliseconds = 1200,
+        Message = "Flash message from the streaming writer"
+    };
+
+    private string status = "Waiting for submission.";
+
+    private async Task HandleSubmitAsync()
+    {
+        Logger.LogInformation(
+            "Response Started : {Time}",
+            DateTime.Now);
+
+        status = $"Waiting {Model.DelayMilliseconds} ms before writing TempData.";
+        await Task.Delay(Model.DelayMilliseconds);
+
+        TempData![TempDataMessage] = Model.Message;
+        Logger.LogInformation(
+            "TempData Assigned : {Time}",
+            DateTime.Now);
+        NavigationManager.NavigateTo("/tempdata-reader", forceLoad: true);
+    }
+
+    private const string TempDataMessage = "TempDataMessage";
+
+    public sealed class StreamingWriteModel
+    {
+        public int DelayMilliseconds { get; set; }
+
+        public string? Message { get; set; }
+    }
+}

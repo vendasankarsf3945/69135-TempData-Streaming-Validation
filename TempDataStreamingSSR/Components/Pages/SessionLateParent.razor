@@ -1,0 +1,40 @@
+@page "/session-late-parent"
+@attribute [StreamRendering]
+@using Microsoft.AspNetCore.Components
+@using TempDataStreamingSSR.Components.Shared
+
+<h1>Session late-mount negative case</h1>
+
+<p>
+    This parent streams first and mounts the session-using child only after the
+    delay, without any earlier session access in the render tree.
+</p>
+
+@if (!showChild)
+{
+    <p><em>Waiting before mounting the child...</em></p>
+}
+else
+{
+    <SessionLateChild />
+}
+
+@code {
+    private bool showChild;
+
+    [Inject]
+    public ILogger<SessionLateParent> Logger { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Logger.LogInformation(
+            "Response Started : {Time}",
+            DateTime.Now);
+
+        await Task.Delay(1200);
+        showChild = true;
+        Logger.LogInformation(
+            "Child Mounted : {Time}",
+            DateTime.Now);
+    }
+}

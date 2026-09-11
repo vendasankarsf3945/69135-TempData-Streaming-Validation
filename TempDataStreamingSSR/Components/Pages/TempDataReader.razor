@@ -1,0 +1,15 @@
+@page "/tempdata-reader"
+@using Microsoft.AspNetCore.Components
+
+<h1>TempData reader</h1>
+
+<p>This page reads TempData once and shows the message captured by the redirect.</p>
+
+<p><strong>Message:</strong> @(TempDataMessage ?? "No TempData message was available.")</p>
+
+<p>Refresh the page to confirm the value was consumed on the first read.</p>
+
+@code {
+    [SupplyParameterFromTempData(Name = "TempDataMessage")]
+    public string? TempDataMessage { get; set; }
+}

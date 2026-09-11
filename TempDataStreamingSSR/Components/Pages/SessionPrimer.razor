@@ -1,0 +1,41 @@
+@page "/session-primer"
+@using Microsoft.AspNetCore.Components
+
+<h1>Session primer</h1>
+
+<p>
+    Use this page first to establish a session value that the streaming page can
+    read before its first flush.
+</p>
+
+<form method="post" @formname="SessionPrimer" @onsubmit="PrimeSession">
+    <button class="btn btn-primary" type="submit">Prime session</button>
+</form>
+
+<p class="mt-3 mb-0">Current session value: @SessionValue</p>
+
+@code {
+    [SupplyParameterFromSession(Name = "sample_session_value")]
+    public int SessionValue { get; set; }
+
+    private object SubmitForm { get; } = new();
+
+    [Inject]
+    public ILogger<SessionPrimer> Logger { get; set; } = default!;
+
+    private void PrimeSession()
+    {
+        Logger.LogInformation(
+            "Response Started : {Time}",
+            DateTime.Now);
+
+        SessionValue = 1;
+        Logger.LogInformation(
+            "Session Assigned : {Time}",
+            DateTime.Now);
+        NavigationManager.NavigateTo("/session-streaming-positive", forceLoad: true);
+    }
+
+    [Inject]
+    public NavigationManager NavigationManager { get; set; } = default!;
+}

@@ -1,0 +1,16 @@
+@namespace TempDataStreamingSSR.Components.Shared
+@using Microsoft.AspNetCore.Components
+
+<div class="sample-card">
+    <p class="section-label">Late-mounted child</p>
+    <p><strong>Session value:</strong> @SessionValue</p>
+    <p class="mb-0">
+        If no session was established before the parent started streaming, this
+        stays at the default value.
+    </p>
+</div>
+
+@code {
+    [SupplyParameterFromSession(Name = "sample_session_value")]
+    public int SessionValue { get; set; }
+}
