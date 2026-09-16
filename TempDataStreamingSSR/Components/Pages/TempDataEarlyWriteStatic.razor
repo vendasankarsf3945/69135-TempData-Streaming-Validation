@@ -1,5 +1,6 @@
 @page "/tempdata-early-nonstreaming"
 @using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Forms
 
 <h1>TempData early write without streaming</h1>
 
@@ -12,14 +13,14 @@
     <div class="mb-3">
         <label class="form-label">
             Delay (milliseconds)
-            <input class="form-control" type="number" @bind="Model.DelayMilliseconds" />
+            <input class="form-control" type="number" name="DelayMilliseconds" value="@DelayMilliseconds" />
         </label>
     </div>
 
     <div class="mb-3">
         <label class="form-label">
             TempData message
-            <input class="form-control" type="text" @bind="Model.Message" />
+            <input class="form-control" type="text" name="Message" value="@Message" />
         </label>
     </div>
 
@@ -38,11 +39,11 @@
     [Inject]
     public ILogger<TempDataEarlyWriteStatic> Logger { get; set; } = default!;
 
-    public EarlyWriteModel Model { get; set; } = new()
-    {
-        DelayMilliseconds = 1200,
-        Message = "Early TempData assignment from the nonstreaming page"
-    };
+    [SupplyParameterFromForm(FormName = "TempDataEarlyNonStreaming")]
+    public int DelayMilliseconds { get; set; } = 1200;
+
+    [SupplyParameterFromForm(FormName = "TempDataEarlyNonStreaming")]
+    public string? Message { get; set; } = "Early TempData assignment from the nonstreaming page";
 
     private string status = "Waiting for submission.";
 
@@ -52,20 +53,13 @@
             "Response Started : {Time}",
             DateTime.Now);
 
-        TempData!["TempDataMessage"] = Model.Message;
+        TempData!["TempDataMessage"] = Message;
         Logger.LogInformation(
             "TempData Assigned : {Time}",
             DateTime.Now);
-        status = $"TempData assigned, now waiting {Model.DelayMilliseconds} ms.";
-        await Task.Delay(Model.DelayMilliseconds);
+        status = $"TempData assigned, now waiting {DelayMilliseconds} ms.";
+        await Task.Delay(DelayMilliseconds);
 
         NavigationManager.NavigateTo("/tempdata-reader", forceLoad: true);
-    }
-
-    public sealed class EarlyWriteModel
-    {
-        public int DelayMilliseconds { get; set; }
-
-        public string? Message { get; set; }
     }
 }

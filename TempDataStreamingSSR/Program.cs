@@ -18,6 +18,7 @@ builder.Services.AddRazorComponents(options =>
     options.TempDataCookie.HttpOnly = true;
     options.TempDataCookie.SameSite = SameSiteMode.Strict;
     options.TempDataCookie.SecurePolicy = CookieSecurePolicy.None;
+    //options.TempDataProviderType = Microsoft.AspNetCore.Components.Endpoints.TempDataProviderType.SessionStorage;
 });
 
 var app = builder.Build();

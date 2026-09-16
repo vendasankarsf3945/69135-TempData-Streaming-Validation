@@ -19,14 +19,14 @@
     <div class="mb-3">
         <label class="form-label">
             Delay (milliseconds)
-            <input class="form-control" type="number" @bind="Model.DelayMilliseconds" />
+            <input class="form-control" type="number" name="DelayMilliseconds" value="@DelayMilliseconds" />
         </label>
     </div>
 
     <div class="mb-3">
         <label class="form-label">
             TempData message
-            <input class="form-control" type="text" @bind="Model.Message" />
+            <input class="form-control" type="text" name="Message" value="@Message" />
         </label>
     </div>
 
@@ -48,11 +48,11 @@
     [Inject]
     public ILogger<StreamingValidation> Logger { get; set; } = default!;
 
-    public StreamingWriteModel Model { get; set; } = new()
-    {
-        DelayMilliseconds = 1200,
-        Message = "Flash message from the streaming writer"
-    };
+    [SupplyParameterFromForm(FormName = "TempDataStreamingWrite")]
+    public int DelayMilliseconds { get; set; } = 1200;
+
+    [SupplyParameterFromForm(FormName = "TempDataStreamingWrite")]
+    public string? Message { get; set; } = "Flash message from the streaming writer";
 
     private string status = "Waiting for submission.";
 
@@ -62,10 +62,10 @@
             "Response Started : {Time}",
             DateTime.Now);
 
-        status = $"Waiting {Model.DelayMilliseconds} ms before writing TempData.";
-        await Task.Delay(Model.DelayMilliseconds);
+        status = $"Waiting {DelayMilliseconds} ms before writing TempData.";
+        await Task.Delay(DelayMilliseconds);
 
-        TempData![TempDataMessage] = Model.Message;
+        TempData![TempDataMessage] = Message;
         Logger.LogInformation(
             "TempData Assigned : {Time}",
             DateTime.Now);
@@ -73,11 +73,4 @@
     }
 
     private const string TempDataMessage = "TempDataMessage";
-
-    public sealed class StreamingWriteModel
-    {
-        public int DelayMilliseconds { get; set; }
-
-        public string? Message { get; set; }
-    }
 }

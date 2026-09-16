@@ -1,5 +1,6 @@
 @page "/session-nonstreaming"
 @using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Forms
 
 <h1>Session nonstreaming positive case</h1>
 
@@ -14,7 +15,7 @@
     <div class="mb-3">
         <label class="form-label">
             Delay (milliseconds)
-            <input class="form-control" type="number" @bind="DelayMilliseconds" />
+            <input class="form-control" type="number" name="DelayMilliseconds" value="@DelayMilliseconds" />
         </label>
     </div>
 
@@ -32,7 +33,8 @@
     [Inject]
     public ILogger<SessionNonStreaming> Logger { get; set; } = default!;
 
-    private int DelayMilliseconds { get; set; } = 1200;
+    [SupplyParameterFromForm(FormName = "SessionNonStreaming")]
+    public int DelayMilliseconds { get; set; } = 1200;
 
     private string status = "Waiting for submission.";
 
