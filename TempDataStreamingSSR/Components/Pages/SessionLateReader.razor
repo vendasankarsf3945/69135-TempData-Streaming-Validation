@@ -1,0 +1,21 @@
+@page "/session-late-reader"
+@using Microsoft.AspNetCore.Components
+
+<h1>Session late reader</h1>
+
+<p>
+    This follow-up request checks whether the late-mounted child successfully
+    persisted its session value.
+</p>
+
+<p><strong>Session value:</strong> @SessionValue</p>
+
+<p class="mb-0">
+    If the late write was rejected, this remains the default value instead of
+    `LateSessionValue-69135`.
+</p>
+
+@code {
+    [SupplyParameterFromSession(Name = "sample_session_value")]
+    public int SessionValue { get; set; }
+}

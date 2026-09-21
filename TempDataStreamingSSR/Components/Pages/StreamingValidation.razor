@@ -39,6 +39,9 @@
     [CascadingParameter]
     public ITempData? TempData { get; set; }
 
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
     [SupplyParameterFromSession(Name = "sample_session_value")]
     public int SessionValue { get; set; }
 
@@ -49,26 +52,27 @@
     public ILogger<StreamingValidation> Logger { get; set; } = default!;
 
     [SupplyParameterFromForm(FormName = "TempDataStreamingWrite")]
-    public int DelayMilliseconds { get; set; } = 1200;
+    public int? DelayMilliseconds { get; set; }
 
     [SupplyParameterFromForm(FormName = "TempDataStreamingWrite")]
-    public string? Message { get; set; } = "Flash message from the streaming writer";
+    public string? Message { get; set; }
 
     private string status = "Waiting for submission.";
 
+    private int DelayMillisecondsValue => DelayMilliseconds ?? 1200;
+
+    private string MessageValue => Message ?? "Flash message from the streaming writer";
+
     private async Task HandleSubmitAsync()
     {
-        Logger.LogInformation(
-            "Response Started : {Time}",
-            DateTime.Now);
+        SampleLog.Info(Logger, "StreamingTempDataWrite", "Cookie", "BeforeDelay", MessageValue, HttpContext);
 
-        status = $"Waiting {DelayMilliseconds} ms before writing TempData.";
-        await Task.Delay(DelayMilliseconds);
+        status = $"Waiting {DelayMillisecondsValue} ms before writing TempData.";
+        await Task.Delay(DelayMillisecondsValue);
 
-        TempData![TempDataMessage] = Message;
-        Logger.LogInformation(
-            "TempData Assigned : {Time}",
-            DateTime.Now);
+        SampleLog.Info(Logger, "StreamingTempDataWrite", "Cookie", "AfterDelayBeforeTempDataWrite", MessageValue, HttpContext);
+        TempData![TempDataMessage] = MessageValue;
+        SampleLog.Info(Logger, "StreamingTempDataWrite", "Cookie", "TempDataAssigned", MessageValue, HttpContext);
         NavigationManager.NavigateTo("/tempdata-reader", forceLoad: true);
     }
 

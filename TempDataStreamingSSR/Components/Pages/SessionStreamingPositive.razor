@@ -31,27 +31,29 @@
 
     private object SubmitForm { get; } = new();
 
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
     [Inject]
     public ILogger<SessionStreamingPositive> Logger { get; set; } = default!;
 
     [SupplyParameterFromForm(FormName = "SessionStreamingPositive")]
-    public int DelayMilliseconds { get; set; } = 1200;
+    public int? DelayMilliseconds { get; set; }
 
     private string status = "Waiting for submission.";
 
+    private int DelayMillisecondsValue => DelayMilliseconds ?? 1200;
+
     private async Task UpdateSessionAsync()
     {
-        Logger.LogInformation(
-            "Response Started : {Time}",
-            DateTime.Now);
+        SampleLog.Info(Logger, "SessionStreamingPositive", "Session", "BeforeDelay", SessionValue, HttpContext);
 
-        status = $"Waiting {DelayMilliseconds} ms before updating session.";
-        await Task.Delay(DelayMilliseconds);
+        status = $"Waiting {DelayMillisecondsValue} ms before updating session.";
+        await Task.Delay(DelayMillisecondsValue);
 
+        SampleLog.Info(Logger, "SessionStreamingPositive", "Session", "AfterDelayBeforeSessionWrite", SessionValue, HttpContext);
         SessionValue++;
-        Logger.LogInformation(
-            "Session Assigned : {Time}",
-            DateTime.Now);
+        SampleLog.Info(Logger, "SessionStreamingPositive", "Session", "SessionAssigned", SessionValue, HttpContext);
         status = $"Session updated to {SessionValue}. Refresh to confirm the value persists.";
     }
 }

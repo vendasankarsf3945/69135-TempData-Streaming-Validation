@@ -14,14 +14,14 @@
     <div class="mb-3">
         <label class="form-label">
             Delay (milliseconds)
-            <input class="form-control" type="number" name="DelayMilliseconds" value="@DelayMilliseconds" />
+            <input class="form-control" type="number" name="DelayMilliseconds" value="@DelayMillisecondsValue" />
         </label>
     </div>
 
     <div class="mb-3">
         <label class="form-label">
             TempData message
-            <input class="form-control" type="text" name="Message" value="@Message" />
+            <input class="form-control" type="text" name="Message" value="@MessageValue" />
         </label>
     </div>
 
@@ -34,6 +34,9 @@
     [CascadingParameter]
     public ITempData? TempData { get; set; }
 
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
     [Inject]
     public NavigationManager NavigationManager { get; set; } = default!;
 
@@ -41,26 +44,27 @@
     public ILogger<TempDataEarlyWrite> Logger { get; set; } = default!;
 
     [SupplyParameterFromForm(FormName = "TempDataEarlyStreaming")]
-    public int DelayMilliseconds { get; set; } = 1200;
+    public int? DelayMilliseconds { get; set; }
 
     [SupplyParameterFromForm(FormName = "TempDataEarlyStreaming")]
-    public string? Message { get; set; } = "Early TempData assignment from the streaming page";
+    public string? Message { get; set; }
 
     private string status = "Waiting for submission.";
 
+    private int DelayMillisecondsValue => DelayMilliseconds ?? 1200;
+
+    private string MessageValue => Message ?? "Early TempData assignment from the streaming page";
+
     private async Task HandleSubmitAsync()
     {
-        Logger.LogInformation(
-            "Response Started : {Time}",
-            DateTime.Now);
+        SampleLog.Info(Logger, "StreamingTempDataEarlyWrite", "Cookie", "BeforeDelay", MessageValue, HttpContext);
 
-        TempData!["TempDataMessage"] = Message;
-        Logger.LogInformation(
-            "TempData Assigned : {Time}",
-            DateTime.Now);
-        status = $"TempData assigned, now waiting {DelayMilliseconds} ms.";
-        await Task.Delay(DelayMilliseconds);
+        TempData!["TempDataMessage"] = MessageValue;
+        SampleLog.Info(Logger, "StreamingTempDataEarlyWrite", "Cookie", "TempDataAssigned", MessageValue, HttpContext);
+        status = $"TempData assigned, now waiting {DelayMillisecondsValue} ms.";
+        await Task.Delay(DelayMillisecondsValue);
 
+        SampleLog.Info(Logger, "StreamingTempDataEarlyWrite", "Cookie", "AfterDelayBeforeRedirect", MessageValue, HttpContext);
         NavigationManager.NavigateTo("/tempdata-reader", forceLoad: true);
     }
 }

@@ -20,19 +20,18 @@
 
     private object SubmitForm { get; } = new();
 
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
     [Inject]
     public ILogger<SessionPrimer> Logger { get; set; } = default!;
 
     private void PrimeSession()
     {
-        Logger.LogInformation(
-            "Response Started : {Time}",
-            DateTime.Now);
+        SampleLog.Info(Logger, "SessionPrimer", "Session", "BeforeSessionPrime", SessionValue, HttpContext);
 
         SessionValue = 1;
-        Logger.LogInformation(
-            "Session Assigned : {Time}",
-            DateTime.Now);
+        SampleLog.Info(Logger, "SessionPrimer", "Session", "SessionPrimed", SessionValue, HttpContext);
         NavigationManager.NavigateTo("/session-streaming-positive", forceLoad: true);
     }
 

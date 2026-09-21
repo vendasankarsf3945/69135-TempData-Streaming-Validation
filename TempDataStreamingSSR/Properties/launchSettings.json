@@ -10,6 +10,16 @@
           "ASPNETCORE_ENVIRONMENT": "Development"
         }
       },
+      "http-session": {
+        "commandName": "Project",
+        "dotnetRunMessages": true,
+        "launchBrowser": true,
+        "applicationUrl": "http://localhost:5055",
+        "environmentVariables": {
+          "ASPNETCORE_ENVIRONMENT": "Development",
+          "TempDataProvider": "Session"
+        }
+      },
       "https": {
         "commandName": "Project",
         "dotnetRunMessages": true,
@@ -17,6 +27,16 @@
         "applicationUrl": "https://localhost:7124;http://localhost:5055",
         "environmentVariables": {
           "ASPNETCORE_ENVIRONMENT": "Development"
+        }
+      },
+      "https-session": {
+        "commandName": "Project",
+        "dotnetRunMessages": true,
+        "launchBrowser": true,
+        "applicationUrl": "https://localhost:7124;http://localhost:5055",
+        "environmentVariables": {
+          "ASPNETCORE_ENVIRONMENT": "Development",
+          "TempDataProvider": "Session"
         }
       }
     }

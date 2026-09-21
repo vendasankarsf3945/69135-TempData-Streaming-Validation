@@ -1,11 +1,13 @@
 using TempDataStreamingSSR.Components;
 
 var builder = WebApplication.CreateBuilder(args);
+var tempDataProviderMode = builder.Configuration["TempDataProvider"] ?? "Cookie";
 
 // Add services to the container.
 builder.Logging.AddConsole();
 builder.Logging.SetMinimumLevel(LogLevel.Debug);
-builder.Logging.AddFilter("Microsoft.AspNetCore.Components", LogLevel.Warning);
+builder.Logging.AddFilter("Microsoft.AspNetCore.Components", LogLevel.Debug);
+builder.Logging.AddFilter("Microsoft.AspNetCore.Components.Endpoints", LogLevel.Warning);
 builder.Logging.AddFilter("TempDataStreamingSSR.Components", LogLevel.Information);
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
@@ -14,11 +16,21 @@ builder.Services.AddSession(options =>
 });
 builder.Services.AddRazorComponents(options =>
 {
-    options.TempDataCookie.Name = ".AspNetCore.Components.TempData";
-    options.TempDataCookie.HttpOnly = true;
-    options.TempDataCookie.SameSite = SameSiteMode.Strict;
-    options.TempDataCookie.SecurePolicy = CookieSecurePolicy.None;
-    //options.TempDataProviderType = Microsoft.AspNetCore.Components.Endpoints.TempDataProviderType.SessionStorage;
+    if (string.Equals(tempDataProviderMode, "Session", StringComparison.OrdinalIgnoreCase))
+    {
+        options.TempDataProviderType = Microsoft.AspNetCore.Components.Endpoints.TempDataProviderType.SessionStorage;
+    }
+    else if (string.Equals(tempDataProviderMode, "Cookie", StringComparison.OrdinalIgnoreCase))
+    {
+        options.TempDataCookie.Name = ".AspNetCore.Components.TempData";
+        options.TempDataCookie.HttpOnly = true;
+        options.TempDataCookie.SameSite = SameSiteMode.Strict;
+        options.TempDataCookie.SecurePolicy = CookieSecurePolicy.None;
+    }
+    else
+    {
+        throw new InvalidOperationException($"Unsupported TempDataProvider mode '{tempDataProviderMode}'. Use Cookie or Session.");
+    }
 });
 
 var app = builder.Build();

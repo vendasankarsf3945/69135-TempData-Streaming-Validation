@@ -4,13 +4,66 @@
 <div class="sample-card">
     <p class="section-label">Late-mounted child</p>
     <p><strong>Session value:</strong> @SessionValue</p>
+    <p><strong>Status:</strong> @status</p>
     <p class="mb-0">
-        If no session was established before the parent started streaming, this
-        stays at the default value.
+        The child attempts a late session write after it mounts, then the follow-
+        up reader checks whether the value persisted.
     </p>
 </div>
 
 @code {
     [SupplyParameterFromSession(Name = "sample_session_value")]
     public int SessionValue { get; set; }
+
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
+    [Inject]
+    public ILogger<SessionLateChild> Logger { get; set; } = default!;
+
+    [Inject]
+    public NavigationManager NavigationManager { get; set; } = default!;
+
+    private bool attemptedLateWrite;
+
+    private string status = "Waiting for late mount.";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || attemptedLateWrite)
+        {
+            return;
+        }
+
+        attemptedLateWrite = true;
+
+        SampleLog.Info(Logger, "SessionLateNegative", "Session", "LateSessionChildInitialized", SessionValue, HttpContext);
+
+        try
+        {
+            SampleLog.Info(Logger, "SessionLateNegative", "Session", "LateSessionWriteAttempt", SessionValue, HttpContext);
+
+            SessionValue = 69135;
+            status = $"Attempted to assign SessionValue = {SessionValue}.";
+
+            SampleLog.Info(Logger, "SessionLateNegative", "Session", "LateSessionValueAssigned", SessionValue, HttpContext);
+        }
+        catch (Exception exception)
+        {
+            status = $"Late session assignment failed: {exception.GetType().Name}.";
+
+            Logger.LogWarning(
+                exception,
+                "Timestamp={Timestamp:O}; Scenario={Scenario}; StorageMode={StorageMode}; Checkpoint={Checkpoint}; Response.HasStarted={HasStarted}; Value={Value}",
+                DateTimeOffset.UtcNow,
+                "SessionLateNegative",
+                "Session",
+                "LateSessionWriteFailed",
+                HttpContext?.Response.HasStarted,
+                SessionValue);
+        }
+
+        await InvokeAsync(StateHasChanged);
+        NavigationManager.NavigateTo("/session-late-reader", forceLoad: true);
+    }
 }
