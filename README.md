@@ -13,8 +13,8 @@ The sample focuses on these scenarios:
 
 - `Program.cs` switches TempData behavior using the `TempDataProvider` configuration value.
 - Session services are always registered and `UseSession()` is always enabled.
-- `appsettings.json` currently sets `TempDataProvider` to `Session`.
-- The late-session negative case attempts to assign the numeric value `69135` to the session-backed property and then reads it back on a follow-up page.
+- `appsettings.json` currently sets `TempDataProvider` to `Cookie`; the `http-session` and `https-session` launch profiles override it to `Session`.
+- The late-session negative case mounts the child after streaming has started, performs a deferred assignment, and then reads the default value back on a follow-up page.
 
 ## Prerequisites
 
@@ -69,7 +69,7 @@ The sample uses a shared helper to make ordering easier to read in console outpu
 - `Response.HasStarted`
 - `Value`
 
-Use those logs together with browser screenshots or network traces to verify ordering instead of relying on a single label like `Response Started`.
+Use those logs together with browser screenshots or network traces to verify ordering instead of relying on a single label like `Response Started`. `StorageMode` is resolved from the active `TempDataProvider` configuration on each request, so session-mode runs log `Session` and cookie-mode runs log `Cookie`.
 
 ## Validation Order
 
@@ -77,7 +77,7 @@ Use those logs together with browser screenshots or network traces to verify ord
 2. Capture the initial request and confirm no prior session cookie exists.
 3. Capture the response that establishes the cookie or session.
 4. Capture the timestamped checkpoints for the delayed write.
-5. For the negative late-session case, verify the attempted value is not restored on the follow-up reader.
+5. For the negative late-session case, verify the first late-session render starts from a clean session and that the follow-up reader still shows the default value after the late assignment occurs.
 
 ## Evidence Layout
 

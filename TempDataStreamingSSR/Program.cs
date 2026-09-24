@@ -6,7 +6,7 @@ var tempDataProviderMode = builder.Configuration["TempDataProvider"] ?? "Cookie"
 // Add services to the container.
 builder.Logging.AddConsole();
 builder.Logging.SetMinimumLevel(LogLevel.Debug);
-builder.Logging.AddFilter("Microsoft.AspNetCore.Components", LogLevel.Debug);
+builder.Logging.AddFilter("Microsoft.AspNetCore.Components", LogLevel.Warning);
 builder.Logging.AddFilter("Microsoft.AspNetCore.Components.Endpoints", LogLevel.Warning);
 builder.Logging.AddFilter("TempDataStreamingSSR.Components", LogLevel.Information);
 builder.Services.AddDistributedMemoryCache();

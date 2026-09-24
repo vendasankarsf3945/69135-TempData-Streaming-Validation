@@ -9,7 +9,8 @@
 <p>
     This parent streams first and mounts the session-using child only after the
     delay, without any earlier session access in the render tree. The child then
-    attempts a late session write and redirects to a follow-up reader page.
+    confirms that the response has already started, performs a late session
+    assignment, and redirects to a follow-up reader page.
 </p>
 
 @if (!showChild)
@@ -34,7 +35,7 @@ else
     {
         SampleLog.Info(Logger, "SessionLateNegative", "Session", "InitialRequest", null, HttpContext);
 
-        await Task.Delay(1200);
+        await Task.Delay(millisecondsDelay: 1200);
         SampleLog.Info(Logger, "SessionLateNegative", "Session", "DelayCompleted", null, HttpContext);
         showChild = true;
         SampleLog.Info(Logger, "SessionLateNegative", "Session", "ChildRenderEnabled", null, HttpContext);

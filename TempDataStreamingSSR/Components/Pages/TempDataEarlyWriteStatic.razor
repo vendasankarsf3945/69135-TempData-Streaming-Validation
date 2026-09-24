@@ -56,14 +56,15 @@
 
     private async Task HandleSubmitAsync()
     {
-        SampleLog.Info(Logger, "NonStreamingTempDataEarlyWrite", "Cookie", "BeforeDelay", MessageValue, HttpContext);
+        var storageMode = SampleLog.ResolveStorageMode(HttpContext);
+        SampleLog.Info(Logger, "NonStreamingTempDataEarlyWrite", storageMode, "BeforeDelay", MessageValue, HttpContext);
 
         TempData!["TempDataMessage"] = MessageValue;
-        SampleLog.Info(Logger, "NonStreamingTempDataEarlyWrite", "Cookie", "TempDataAssigned", MessageValue, HttpContext);
+        SampleLog.Info(Logger, "NonStreamingTempDataEarlyWrite", storageMode, "TempDataAssigned", MessageValue, HttpContext);
         status = $"TempData assigned, now waiting {DelayMillisecondsValue} ms.";
         await Task.Delay(DelayMillisecondsValue);
 
-        SampleLog.Info(Logger, "NonStreamingTempDataEarlyWrite", "Cookie", "AfterDelayBeforeRedirect", MessageValue, HttpContext);
+        SampleLog.Info(Logger, "NonStreamingTempDataEarlyWrite", storageMode, "AfterDelayBeforeRedirect", MessageValue, HttpContext);
         NavigationManager.NavigateTo("/tempdata-reader", forceLoad: true);
     }
 }

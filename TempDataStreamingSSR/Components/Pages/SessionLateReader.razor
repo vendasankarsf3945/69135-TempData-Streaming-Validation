@@ -4,15 +4,15 @@
 <h1>Session late reader</h1>
 
 <p>
-    This follow-up request checks whether the late-mounted child successfully
-    persisted its session value.
+    This follow-up request checks whether the late-mounted child changed the
+    session value after streaming had already started.
 </p>
 
 <p><strong>Session value:</strong> @SessionValue</p>
 
 <p class="mb-0">
-    If the late write was rejected, this remains the default value instead of
-    `LateSessionValue-69135`.
+    If the late assignment happened after the response had already started, this
+    should still remain the default value instead of `69135`.
 </p>
 
 @code {
